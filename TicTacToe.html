@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
+        </script>
+    </head>
+    <body>
+        <pyxel-run script="
+import pyxel
+
+lebar = 240
+tinggi = 240
+hitam = 2
+
+papan = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]
+pemain1 = 0 
+pemenang = None
+game_over = False
+
+def draw_papan():
+    pyxel.cls(15)
+    pyxel.rect(80, 0, 2, tinggi, hitam)
+    pyxel.rect(160, 0, 2, tinggi, hitam)
+    pyxel.rect(0, 80, lebar, 2, hitam)
+    pyxel.rect(0, 160, lebar, 2, hitam)
+    for row in range(3):
+        for col in range(3):
+            if papan[row][col] == 0:
+                pyxel.text(10 + col * 80, 10 + row * 80, 'X', hitam)
+            elif papan[row][col] == 1:
+                pyxel.text(10 + col * 80, 10 + row * 80, 'O', hitam)
+
+def check_pemenang():
+    global pemenang
+    for i in range(3):
+        if papan[i][0] == papan[i][1] == papan[i][2] != -1:
+            pemenang = papan[i][0]
+            return True
+        if papan[0][i] == papan[1][i] == papan[2][i] != -1:
+            pemenang = papan[0][i]
+            return True
+    if papan[0][0] == papan[1][1] == papan[2][2] != -1:
+        pemenang = papan[0][0]
+        return True
+    if papan[0][2] == papan[1][1] == papan[2][0] != -1:
+        pemenang = papan[0][2]
+        return True
+    return False
+
+def update():
+    global pemain1, game_over
+    if game_over:
+        return
+    if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+        mouse_x = pyxel.mouse_x // 80
+        mouse_y = pyxel.mouse_y // 80
+        if papan[mouse_y][mouse_x] == -1:
+            papan[mouse_y][mouse_x] = pemain1
+            if check_pemenang():
+                game_over = True
+            pemain1 = 1 - pemain1
+
+def draw():
+    draw_papan()
+    if game_over:
+        if pemenang is not None:
+            pyxel.text(90, 110, f'Player {pemenang + 1} Menang!', hitam)
+        else:
+            pyxel.text(100, 110, 'Permainan Seri!', hitam)
+
+pyxel.init(lebar, tinggi)
+pyxel.mouse(True)
+pyxel.run(update, draw)
+"></pyxel-run>
+    </body>
+</html>
