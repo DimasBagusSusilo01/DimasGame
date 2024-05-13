@@ -25,7 +25,7 @@
                 self.w = 10
                 self.h = 10
                 self.speed = 1
-                pyxel.image(1).load(0,0,'musuhpyxelbaru.png')
+                pyxel.images[1].load(0,0,'musuhpyxelbaru.png')
         
             def update(self):
                 self.y += 1
@@ -39,7 +39,7 @@
                 self.y = y
                 self.w = 10
                 self.h = 10
-                pyxel.image(0).load(0, 0, 'musuhpyxel.png')
+                pyxel.images[0].load(0, 0, 'musuhpyxel.png')
         
             def update(self):
                 self.x = pyxel.mouse_x
