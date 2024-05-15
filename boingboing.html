@@ -1,74 +1,111 @@
-<html>
-    <head>
-        <title>game ping pong</title>
-        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
-        </script>
-    </head>
-    <body>
-        <pyxel-run script = "
-        import pyxel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong Multiplayer</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000;
+        }
+        canvas {
+            border: 2px solid #fff;
+        }
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            user-select: none;
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="controls">
+        <div class="button" id="up1">↑</div>
+        <div class="button" id="down1">↓</div>
+        <div class="button" id="up2">↑</div>
+        <div class="button" id="down2">↓</div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
 
-        class PingPong:
-            def __init__(self):
-                pyxel.init(160, 120, title='Dimas Pong')
-                self.reset()
-                pyxel.run(self.update, self.draw)
-        
-            def reset(self):
-                self.bolax = pyxel.width / 2
-                self.bolay = pyxel.height / 2
-                self.ball_vx = 2
-                self.ball_vy = 2
-                self.pemain1y = pyxel.height / 2
-                self.pemain2y = pyxel.height / 2
-                self.skor1 = 0
-                self.skor2 = 0
-        
-            def update(self):
-                self.bolax += self.ball_vx
-                self.bolay += self.ball_vy
-        
-                if self.bolay <= 0 or self.bolay >= pyxel.height - 2:
-                    self.ball_vy *= -1
-        
-                if (self.bolax <= 10 and self.pemain1y <= self.bolay <= self.pemain1y + 16):
-                    self.ball_vx *= -1
-                    self.skor1 += 1
-                elif (self.bolax >= pyxel.width - 10 and self.pemain2y <= self.bolay <= self.pemain2y + 16):
-                    self.ball_vx *= -1
-                    self.skor2 += 1
-                
-                if self.bolax < 0:
-                    self.skor2 += 1
-                    self.reset()
-                elif self.bolax > pyxel.width:
-                    self.skor1 += 1
-                    self.reset()
-        
-                if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
-                    self.pemain1y -= 2
-                if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
-                    self.pemain1y += 2
-                if pyxel.btn(pyxel.GAMEPAD2_BUTTON_DPAD_UP):
-                    self.pemain2y -= 2
-                if pyxel.btn(pyxel.GAMEPAD2_BUTTON_DPAD_DOWN):
-                    self.pemain2y += 2
-        
-                self.pemain1y = max(0, min(pyxel.height - 16, self.pemain1y))
-                self.pemain2y = max(0, min(pyxel.height - 16, self.pemain2y))
-        
-            def draw(self):
-                pyxel.cls(0)
-                pyxel.rect(self.bolax, self.bolay, 2, 2, 7)
-                pyxel.rect(5, self.pemain1y, 2, 16, 7)
-                pyxel.rect(pyxel.width - 7, self.pemain2y, 2, 16, 7)
-                pyxel.text(50, 4, str(self.skor1), 7)
-                pyxel.text(100, 4, str(self.skor2), 7)
-        
-        if __name__ == '__main__':
-            PingPong()
-        
-        
-        "></pyxel-run>
-    </body>
-</html>
+        const paddleWidth = 10, paddleHeight = 100, ballSize = 10;
+        let player1Y = canvas.height / 2 - paddleHeight / 2;
+        let player2Y = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2 - ballSize / 2;
+        let ballY = canvas.height / 2 - ballSize / 2;
+        let ballSpeedX = 5, ballSpeedY = 5;
+        const paddleSpeed = 10;
+        let player1Score = 0, player2Score = 0;
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = 'white';
+            context.fillRect(50, player1Y, paddleWidth, paddleHeight);
+            context.fillRect(canvas.width - 50 - paddleWidth, player2Y, paddleWidth, paddleHeight);
+            context.fillRect(ballX, ballY, ballSize, ballSize);
+            context.font = '32px Arial';
+            context.fillText(player1Score, canvas.width / 4, 50);
+            context.fillText(player2Score, canvas.width * 3 / 4, 50);
+        }
+
+        function moveBall() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+            if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+                ballSpeedY = -ballSpeedY;
+            }
+            if ((ballX <= 60 && ballY > player1Y && ballY < player1Y + paddleHeight) ||
+                (ballX >= canvas.width - 60 - ballSize && ballY > player2Y && ballY < player2Y + paddleHeight)) {
+                ballSpeedX = -ballSpeedX;
+            }
+            if (ballX < 0) {
+                player2Score++;
+                resetBall();
+            }
+            if (ballX > canvas.width - ballSize) {
+                player1Score++;
+                resetBall();
+            }
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2 - ballSize / 2;
+            ballY = canvas.height / 2 - ballSize / 2;
+            ballSpeedX = -ballSpeedX;
+        }
+
+        function gameLoop() {
+            draw();
+            moveBall();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.getElementById('up1').addEventListener('touchstart', () => { if (player1Y > 0) player1Y -= paddleSpeed; });
+        document.getElementById('down1').addEventListener('touchstart', () => { if (player1Y < canvas.height - paddleHeight) player1Y += paddleSpeed; });
+        document.getElementById('up2').addEventListener('touchstart', () => { if (player2Y > 0) player2Y -= paddleSpeed; });
+        document.getElementById('down2').addEventListener('touchstart', () => { if (player2Y < canvas.height - paddleHeight) player2Y += paddleSpeed; });
+
+        gameLoop();
+    </script>
+</body>
+            </html>
