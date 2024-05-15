@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <title>game ping pong</title>
+        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
+        </script>
+    </head>
+    <body>
+        <pyxel-run script = "
+        import pyxel
+
+        class PingPong:
+            def __init__(self):
+                pyxel.init(160, 120, title='Dimas Pong')
+                self.reset()
+                pyxel.run(self.update, self.draw)
+        
+            def reset(self):
+                self.bolax = pyxel.width / 2
+                self.bolay = pyxel.height / 2
+                self.ball_vx = 2
+                self.ball_vy = 2
+                self.pemain1y = pyxel.height / 2
+                self.pemain2y = pyxel.height / 2
+                self.skor1 = 0
+                self.skor2 = 0
+        
+            def update(self):
+                self.bolax += self.ball_vx
+                self.bolay += self.ball_vy
+        
+                if self.bolay <= 0 or self.bolay >= pyxel.height - 2:
+                    self.ball_vy *= -1
+        
+                if (self.bolax <= 10 and self.pemain1y <= self.bolay <= self.pemain1y + 16):
+                    self.ball_vx *= -1
+                    self.skor1 += 1
+                elif (self.bolax >= pyxel.width - 10 and self.pemain2y <= self.bolay <= self.pemain2y + 16):
+                    self.ball_vx *= -1
+                    self.skor2 += 1
+                
+                if self.bolax < 0:
+                    self.skor2 += 1
+                    self.reset()
+                elif self.bolax > pyxel.width:
+                    self.skor1 += 1
+                    self.reset()
+        
+                if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
+                    self.pemain1y -= 2
+                if pyxel.btn(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
+                    self.pemain1y += 2
+                if pyxel.btn(pyxel.GAMEPAD2_BUTTON_DPAD_UP):
+                    self.pemain2y -= 2
+                if pyxel.btn(pyxel.GAMEPAD2_BUTTON_DPAD_DOWN):
+                    self.pemain2y += 2
+        
+                self.pemain1y = max(0, min(pyxel.height - 16, self.pemain1y))
+                self.pemain2y = max(0, min(pyxel.height - 16, self.pemain2y))
+        
+            def draw(self):
+                pyxel.cls(0)
+                pyxel.rect(self.bolax, self.bolay, 2, 2, 7)
+                pyxel.rect(5, self.pemain1y, 2, 16, 7)
+                pyxel.rect(pyxel.width - 7, self.pemain2y, 2, 16, 7)
+                pyxel.text(50, 4, str(self.skor1), 7)
+                pyxel.text(100, 4, str(self.skor2), 7)
+        
+        if __name__ == '__main__':
+            PingPong()
+        
+        
+        "></pyxel-run>
+    </body>
+</html>
