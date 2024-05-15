@@ -56,6 +56,7 @@
         let ballSpeedX = 5, ballSpeedY = 5;
         const paddleSpeed = 10;
         let player1Score = 0, player2Score = 0;
+        let up1Pressed = false, down1Pressed = false, up2Pressed = false, down2Pressed = false;
 
         function draw() {
             context.clearRect(0, 0, canvas.width, canvas.height);
@@ -94,18 +95,38 @@
             ballSpeedX = -ballSpeedX;
         }
 
+        function handleInput() {
+            if (up1Pressed && player1Y > 0) {
+                player1Y -= paddleSpeed;
+            }
+            if (down1Pressed && player1Y < canvas.height - paddleHeight) {
+                player1Y += paddleSpeed;
+            }
+            if (up2Pressed && player2Y > 0) {
+                player2Y -= paddleSpeed;
+            }
+            if (down2Pressed && player2Y < canvas.height - paddleHeight) {
+                player2Y += paddleSpeed;
+            }
+        }
+
+        document.getElementById('up1').addEventListener('touchstart', () => { up1Pressed = true; });
+        document.getElementById('up1').addEventListener('touchend', () => { up1Pressed = false; });
+        document.getElementById('down1').addEventListener('touchstart', () => { down1Pressed = true; });
+        document.getElementById('down1').addEventListener('touchend', () => { down1Pressed = false; });
+        document.getElementById('up2').addEventListener('touchstart', () => { up2Pressed = true; });
+        document.getElementById('up2').addEventListener('touchend', () => { up2Pressed = false; });
+        document.getElementById('down2').addEventListener('touchstart', () => { down2Pressed = true; });
+        document.getElementById('down2').addEventListener('touchend', () => { down2Pressed = false; });
+
         function gameLoop() {
+            handleInput();
             draw();
             moveBall();
             requestAnimationFrame(gameLoop);
         }
 
-        document.getElementById('up1').addEventListener('touchstart', () => { if (player1Y > 0) player1Y -= paddleSpeed; });
-        document.getElementById('down1').addEventListener('touchstart', () => { if (player1Y < canvas.height - paddleHeight) player1Y += paddleSpeed; });
-        document.getElementById('up2').addEventListener('touchstart', () => { if (player2Y > 0) player2Y -= paddleSpeed; });
-        document.getElementById('down2').addEventListener('touchstart', () => { if (player2Y < canvas.height - paddleHeight) player2Y += paddleSpeed; });
-
         gameLoop();
     </script>
 </body>
-            </html>
+</html>
