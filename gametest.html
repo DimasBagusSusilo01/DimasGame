@@ -1,57 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2d2d2d;
+        }
+    </style>
 </head>
 <body>
-
     <script>
-    class Example extends Phaser.Scene
-    {
-        preload ()
-        {
-            this.load.setBaseURL('https://labs.phaser.io');
+        class MemoryGame extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MemoryGame' });
+            }
 
-            this.load.image('sky', 'assets/skies/space3.png');
-            this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-            this.load.image('red', 'assets/particles/red.png');
-        }
+            preload() {
+                this.load.image('card', 'mainanpyxel.png');
+            }
 
-        create ()
-        {
-            this.add.image(400, 300, 'sky');
+            create() {
+                this.cards = [];
+                this.selectedCards = [];
+                this.createBoard();
+            }
 
-            const particles = this.add.particles(0, 0, 'red', {
-                speed: 100,
-                scale: { start: 1, end: 0 },
-                blendMode: 'ADD'
-            });
+            createBoard() {
+                let positions = this.generateCardPositions();
+                positions.forEach(pos => {
+                    let card = this.add.sprite(pos.x, pos.y, 'card').setInteractive();
+                    card.cardId = pos.id;
+                    card.open = false;
+                    card.on('pointerdown', () => this.onCardClicked(card));
+                    this.cards.push(card);
+                });
+            }
 
-            const logo = this.physics.add.image(400, 100, 'logo');
+            generateCardPositions() {
+                let positions = [];
+                let ids = [1, 2, 3, 4, 5, 6];
+                ids = ids.concat(ids); // Double the array to have pairs
 
-            logo.setVelocity(100, 200);
-            logo.setBounce(1, 1);
-            logo.setCollideWorldBounds(true);
+                Phaser.Utils.Array.Shuffle(ids);
 
-            particles.startFollow(logo);
-        }
-    }
+                for (let i = 0; i < 12; i++) {
+                    let x = 100 + (i % 4) * 150;
+                    let y = 100 + Math.floor(i / 4) * 150;
+                    positions.push({ x: x, y: y, id: ids[i] });
+                }
 
-    const config = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        scene: Example,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 200 }
+                return positions;
+            }
+
+            onCardClicked(card) {
+                if (card.open || this.selectedCards.length === 2) {
+                    return;
+                }
+
+                card.open = true;
+                card.setTint(0x00ff00); // Change the color to indicate it's opened
+                this.selectedCards.push(card);
+
+                if (this.selectedCards.length === 2) {
+                    this.checkForMatch();
+                }
+            }
+
+            checkForMatch() {
+                let [card1, card2] = this.selectedCards;
+
+                if (card1.cardId === card2.cardId) {
+                    // It's a match
+                    this.selectedCards = [];
+                } else {
+                    // Not a match, close cards after a short delay
+                    this.time.delayedCall(1000, () => {
+                        card1.open = false;
+                        card2.open = false;
+                        card1.clearTint();
+                        card2.clearTint();
+                        this.selectedCards = [];
+                    });
+                }
             }
         }
-    };
 
-    const game = new Phaser.Game(config);
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            scene: MemoryGame
+        };
+
+        const game = new Phaser.Game(config);
     </script>
-
 </body>
 </html>
