@@ -1,107 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #2d2d2d;
-        }
-    </style>
-</head>
-<body>
-    <script>
-        class MemoryGame extends Phaser.Scene {
-            constructor() {
-                super({ key: 'MemoryGame' });
-            }
-
-            preload() {
-                this.load.image('card', 'mainanpyxel.png');
-            }
-
-            create() {
-                this.cards = [];
-                this.selectedCards = [];
-                this.createBoard();
-            }
-
-            createBoard() {
-                let positions = this.generateCardPositions();
-                positions.forEach(pos => {
-                    let card = this.add.sprite(pos.x, pos.y, 'card').setInteractive();
-                    card.cardId = pos.id;
-                    card.open = false;
-                    card.on('pointerdown', () => this.onCardClicked(card));
-                    this.cards.push(card);
-                });
-            }
-
-            generateCardPositions() {
-                let positions = [];
-                let ids = [1, 2, 3, 4, 5, 6];
-                ids = ids.concat(ids); // Double the array to have pairs
-
-                Phaser.Utils.Array.Shuffle(ids);
-
-                for (let i = 0; i < 12; i++) {
-                    let x = 100 + (i % 4) * 150;
-                    let y = 100 + Math.floor(i / 4) * 150;
-                    positions.push({ x: x, y: y, id: ids[i] });
-                }
-
-                return positions;
-            }
-
-            onCardClicked(card) {
-                if (card.open || this.selectedCards.length === 2) {
-                    return;
-                }
-
-                card.open = true;
-                card.setTint(0x00ff00); // Change the color to indicate it's opened
-                this.selectedCards.push(card);
-
-                if (this.selectedCards.length === 2) {
-                    this.checkForMatch();
-                }
-            }
-
-            checkForMatch() {
-                let [card1, card2] = this.selectedCards;
-
-                if (card1.cardId === card2.cardId) {
-                    // It's a match
-                    this.selectedCards = [];
-                } else {
-                    // Not a match, close cards after a short delay
-                    this.time.delayedCall(1000, () => {
-                        card1.open = false;
-                        card2.open = false;
-                        card1.clearTint();
-                        card2.clearTint();
-                        this.selectedCards = [];
-                    });
-                }
-            }
-        }
-
-        const config = {
-            type: Phaser.AUTO,
-            width: 800,
-            height: 600,
-            scene: MemoryGame
-        };
-
-        const game = new Phaser.Game(config);
-    </script>
-</body>
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
+        </script>
+    </head>
+    <body>
+        <pyxel-run script="
+        import pyxel
+        import random
+        import time
+        
+        # Konstanta
+        WINDOW_WIDTH = 128
+        WINDOW_HEIGHT = 128
+        CARD_SIZE = 16
+        NUM_CARDS = 16  # Total kartu (harus genap)
+        GRID_ROWS = 2
+        GRID_COLS = 4
+        MARGIN = 4
+        
+        # Kartu-kartu
+        cards = list(range(NUM_CARDS // 2)) * 2
+        random.shuffle(cards)
+        matched = [False] * NUM_CARDS
+        
+        # Status game
+        first_card = None
+        second_card = None
+        start_time = None
+        end_time = None
+        
+        class MemoryGame:
+            def __init__(self):
+                pyxel.init(WINDOW_WIDTH, WINDOW_HEIGHT)
+                self.reset_game()
+                pyxel.mouse(True)
+                pyxel.run(self.update, self.draw)
+        
+            def reset_game(self):
+                global cards, matched, first_card, second_card, start_time, end_time
+                random.shuffle(cards)
+                matched = [False] * NUM_CARDS
+                first_card = None
+                second_card = None
+                start_time = time.time()
+                end_time = None
+        
+            def update(self):
+                global first_card, second_card, end_time
+        
+                if pyxel.btnp(pyxel.KEY_Q):
+                    pyxel.quit()
+        
+                if end_time:
+                    return
+        
+                if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                    x = pyxel.mouse_x
+                    y = pyxel.mouse_y
+                    col = x // (CARD_SIZE + MARGIN)
+                    row = y // (CARD_SIZE + MARGIN)
+                    card_index = row * GRID_COLS + col
+        
+                    if 0 <= card_index < NUM_CARDS and not matched[card_index]:
+                        if first_card is None:
+                            first_card = card_index
+                        elif second_card is None and card_index != first_card:
+                            second_card = card_index
+        
+                        if first_card is not None and second_card is not None:
+                            if cards[first_card] == cards[second_card]:
+                                matched[first_card] = True
+                                matched[second_card] = True
+                                if all(matched):
+                                    end_time = time.time()
+                            first_card = None
+                            second_card = None
+        
+            def draw(self):
+                pyxel.cls(0)
+        
+                for i in range(NUM_CARDS):
+                    col = i % GRID_COLS
+                    row = i // GRID_COLS
+                    x = col * (CARD_SIZE + MARGIN)
+                    y = row * (CARD_SIZE + MARGIN)
+                    if matched[i] or i == first_card or i == second_card:
+                        pyxel.rect(x, y, CARD_SIZE, CARD_SIZE, cards[i] + 1)
+                    else:
+                        pyxel.rect(x, y, CARD_SIZE, CARD_SIZE, pyxel.COLOR_DARK_BLUE)
+        
+                if end_time:
+                    elapsed_time = end_time - start_time
+                    pyxel.text(10, 100, f'Waktu: {elapsed_time:.2f} detik', pyxel.COLOR_YELLOW)
+        
+        MemoryGame()
+        
+"></pyxel-run>
+    </body>
 </html>
