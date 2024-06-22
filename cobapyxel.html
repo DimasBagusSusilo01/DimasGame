@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">
+            
+        </script>
+    </head>
+    <body>
+        <pyxel-run script="
+        import pyxel
+
+class char1:
+    def __init__(self,x,y ):
+        self.x = x
+        self.y = y
+        self.w = 64
+        self.h = 64
+        pyxel.images[0].load(0,0,'karakter.png')
+    def update(self):
+        pass
+    def draw(self):
+        pyxel.blt(100,5,0,0,0,self.w,self.h,10)
+
+class App:
+    def __init__(self):
+        pyxel.init(160, 120)
+        self.x = 0
+        self.char1 = char1(100,5)
+        pyxel.run(self.update, self.draw)
+
+    def update(self):
+        self.x = (self.x + 1) % pyxel.width
+        self.life = 100
+        self.re = 100
+        self.mana = 100
+        self.Sta = 100
+        self.food = 100
+
+    def draw(self):
+        pyxel.cls(2)
+        pyxel.rect(self.x, 0, 8, 8, 9)
+        pyxel.text(5,5,"life: {}".format(self.life),6)
+        pyxel.text (5,11,"Relationship: {}".format(self.re),6)
+        pyxel.text(5,17,"Mana: {}".format(self.mana),6)
+        pyxel.text(5,23,"Stamina: {}".format(self.Sta),6)
+        pyxel.text(5,29,"Food: {}".format(self.food),6)
+        self.char1.draw()
+
+App()"></pyxel-run>
+    </body>
+</html>
