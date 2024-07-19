@@ -110,5 +110,28 @@ function scrollRight() {
         Enjoy The Game!
     </div>
     <script src="script.js"></script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCaJwT5JZucdgqCBHqhInMBNEbh9ouqLiA",
+    authDomain: "dimas-game-caf98.firebaseapp.com",
+    projectId: "dimas-game-caf98",
+    storageBucket: "dimas-game-caf98.appspot.com",
+    messagingSenderId: "989774616155",
+    appId: "1:989774616155:web:cc0c525806b2beee5d117e",
+    measurementId: "G-SHLJP8DDCT"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 </html>
