@@ -1,114 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimas's Game</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playwrite+CU:wght@100..400&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-    <style>
-body {
-    font-family: Arial, sans-serif;
-}
-
-.scroll-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 50px;
-    background-color: #ffb1f9;
-}
-.content{
-    font-family: "Bebas Neue", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-}
-.header{
-    background-color: hotpink;
-    font-family: "Playwrite CU", cursive;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-} 
-.button-container {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    width: 120px;
-    border: 8px solid #147ca5;
-    padding: 10px;
-    background-color: cornflowerblue;
-    border-radius: 10px;
-    white-space: nowrap;
-}
-
-.btn {
-    flex: 0 0 auto;
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    border: 5px solid #ff0080;
-    background-color: #8cc9ff;
-    border-radius: 5px;
-    font-family: "Bebas Neue", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-
-}
-
-.scroll-button {
-    font-size: 24px;
-    padding: 10px;
-    cursor: pointer;
-    background-color: #ffb1f9;
-    border: 1px solid #000000;
-    border-radius: 30%;
-    transition: background 0.3s, transform 0.2s;
-    margin: 20px;
-}
-
-    </style>
-    <script>
-        function scrollLeft() {
-    document.querySelector('.button-container').scrollBy({
-        top: 0,
-        left: -100,
-        behavior: 'smooth'
-    });
-}
-
-function scrollRight() {
-    document.querySelector('.button-container').scrollBy({
-        top: 0,
-        left: 100,
-        behavior: 'smooth'
-    });
-}
-
-    </script>
-</head>
-<body>
-    <div class="header" align="center">
-        Dimas's Game
-    </div>
-    <div class="scroll-container">
-        <button class="scroll-button" onclick="scrollLeft()">&#9664;</button>
-        <div class="button-container">
-            <button class="btn">Button 1</button>
-            <button class="btn">Button 2</button>
-            <button class="btn">Button 3</button>
-            <button class="btn">Button 4</button>
-            <button class="btn">Button 5</button>
-        </div>
-        <button class="scroll-button" onclick="scrollRight()">&#9654;</button>
-    </div><br>
-    <div class = "content" align = "center">(klik/tekan jika muncul logo pyxel untuk memulai permainan.<br> Kemudian klik lagi untuk benar benar memulai permainan.<br> Jika ada bug atau kesalahan segera hubungi dimas-kun)<br>
-        (Selamat Bermain!)</div><br>
-    <div class="header" align="center">
-        Enjoy The Game!
-    </div>
-    <script src="script.js"></script>
-</body>
+<html>
+    <head>
+        <title>Game Injak Injak</title>
+        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
+        </script>
+    </head>
+    <body>
+        <pyxel-run script="
+        import pyxel
+        import random
+        
+        class App:
+            def __init__(self):
+                self.FPS = 30
+                pyxel.init(168, 128,fps=self.FPS)
+                self.boxes = [[0 for _ in range(4)] for _ in range(4)]
+                self.clicked_boxes = [[False for _ in range(4)] for _ in range(4)]
+                self.random_x = -1
+                self.random_y = -1
+                self.timer = 0
+                self.game_over = False
+                self.mulaiwaktu = pyxel.frame_count
+                self.bool = True
+                self.generate_random_x()
+                pyxel.mouse(True)  
+                pyxel.run(self.update, self.draw)
+        
+            def update(self):
+                if not self.game_over:
+                    self.timer += 1
+                    if self.timer > 15:  # 30 frames per second, change every half second
+                        self.generate_random_x()
+                        self.timer = 0
+        
+                    skorwaktu = 0
+                    if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                        skorwaktu += 1
+                        mouse_x = pyxel.mouse_x
+                        mouse_y = pyxel.mouse_y
+                        box_x = mouse_x // 32
+                        box_y = mouse_y // 32
+                        if box_x < 4 and box_y < 4:
+                            if self.random_x == box_x and self.random_y == box_y:
+                                self.game_over = True
+                                self.bool = False
+                            elif not self.clicked_boxes[box_y][box_x]:
+                                self.boxes[box_y][box_x] = (self.boxes[box_y][box_x] + 1) % 2
+                                self.clicked_boxes[box_y][box_x] = True
+                                self.generate_random_x()
+        
+            def generate_random_x(self):
+                available_positions = [(x, y) for y in range(4) for x in range(4) if not self.clicked_boxes[y][x]]
+                if available_positions:
+                    self.random_x, self.random_y = random.choice(available_positions)
+                else:
+                    self.random_x, self.random_y = -1, -1
+        
+            def draw(self):
+                pyxel.cls(0)
+                if self.bool:
+                    elapsed_time = (pyxel.frame_count - self.mulaiwaktu) // self.FPS
+                    self.angka = str(int(elapsed_time))
+                    pyxel.text(130, 10, f'waktu:{elapsed_time}', pyxel.COLOR_WHITE)
+                else:
+                    pyxel.text(130, 10,f'skor:{self.angka}', pyxel.COLOR_RED)
+                for y in range(4):
+                    for x in range(4):
+                        color = 11 if self.boxes[y][x] == 0 else 7
+                        pyxel.rect(x * 32, y * 32, 32, 32, color)
+                        pyxel.rectb(x * 32, y * 32, 32, 32, 0)  # Grid lines
+                        if self.random_x == x and self.random_y == y:
+                            pyxel.text(x * 32 + 12, y * 32 + 12, 'X', 8)
+                if self.game_over:
+                    pyxel.text(40, 60, 'Game Over', pyxel.frame_count % 16)
+        
+        App()
+        
+        "></pyxel-run>
+    </body>
 </html>
