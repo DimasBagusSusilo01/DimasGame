@@ -9,6 +9,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Playwrite+CU:wght@100..400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+}
+
+#background-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 body {
     font-family: Arial, sans-serif;
 }
@@ -18,18 +33,19 @@ body {
     align-items: center;
     justify-content: center;
     margin-top: 50px;
-    background-color: #ffb1f9;
 }
 .content{
     font-family: "Bebas Neue", sans-serif;
     font-weight: 400;
+    color: aliceblue;
     font-style: normal;
 }
 .header{
-    background-color: hotpink;
     font-family: "Playwrite CU", cursive;
     font-optical-sizing: auto;
-    font-weight: 400;
+    font-weight: 800;
+    font-size: 40px;
+    color: aliceblue;
     font-style: normal;
 } 
 .button-container {
@@ -37,7 +53,7 @@ body {
     overflow-x: auto;
     scroll-behavior: smooth;
     width: 120px;
-    border: 8px solid #147ca5;
+    border: 8px solid #ff2fd2;
     padding: 10px;
     background-color: cornflowerblue;
     border-radius: 10px;
@@ -90,8 +106,15 @@ function scrollRight() {
     </script>
 </head>
 <body>
+    <br><br><br>
+    <div class="video-background">
+        <video autoplay muted loop id="background-video">
+            <source src="C:\Users\Dimas\Downloads\videogame.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
     <div class="header" align="center">
-        Dimas's Game
+        Dima's Game
     </div>
     <div class="scroll-container">
         <button class="scroll-button" onclick="scrollLeft()">&#9664;</button>
