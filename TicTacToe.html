@@ -8,12 +8,14 @@
         body {
             margin: 0;
             padding: 0;
-        }
-        #game-container {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            border: 1px solid #000;
         }
         canvas {
             border: 1px solid #000;
@@ -49,16 +51,8 @@
         function preload() {}
 
         function create() {
-            this.add.line(120, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            this.add.line(80, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            this.add.line(160, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            this.add.line(0, 80, lebar, 0, hitam).setOrigin(0, 0);
-            this.add.line(0, 160, lebar, 0, hitam).setOrigin(0, 0);
-            this.add.line(0, 240, lebar, 0, hitam).setOrigin(0, 0);
-            
-            this.input.on('pointerdown', handleClick, this);
-
             drawPapan(this);
+            this.input.on('pointerdown', handleClick, this);
         }
 
         function update() {
@@ -77,10 +71,10 @@
 
                 if (checkPemenang()) {
                     gameOver = true;
-                    this.add.text(90, 110, `Player ${pemenang + 1} Menang!`, { fontSize: '16px', fill: '#000' });
+                    this.add.text(50, 0, `Player ${pemenang + 1} Menang!`, { fontSize: '16px', fill: '#000' });
                 } else if (isFull()) {
                     gameOver = true;
-                    this.add.text(100, 110, 'Permainan Seri!', { fontSize: '16px', fill: '#000' });
+                    this.add.text(90, 110, 'Permainan Seri!', { fontSize: '16px', fill: '#000' });
                 } else {
                     pemain1 = 1 - pemain1;
                 }
@@ -90,18 +84,21 @@
         function drawPapan(scene) {
             scene.children.removeAll();
 
-            scene.add.line(120, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            scene.add.line(80, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            scene.add.line(160, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
-            scene.add.line(0, 80, lebar, 0, hitam).setOrigin(0, 0);
-            scene.add.line(0, 160, lebar, 0, hitam).setOrigin(0, 0);
+            // Garis vertikal
+            scene.add.line(80, 0, 80, 0, 80, tinggi, hitam).setOrigin(0, 0);
+            scene.add.line(-80, 0, 160, 0, 160, tinggi, hitam).setOrigin(0, 0);
+
+            // Garis horizontal
+            scene.add.line(0,0,80,80,400,80,hitam);
+            scene.add.line(0,80,80,80,400,80,hitam)
+           
 
             for (let row = 0; row < 3; row++) {
                 for (let col = 0; col < 3; col++) {
                     if (papan[row][col] === 0) {
-                        scene.add.text(10 + col * 80, 10 + row * 80, 'X', { fontSize: '64px', fill: '#000' });
+                        scene.add.text(30 + col * 80, 20 + row * 80, 'X', { fontSize: '64px', fill: '#000' });
                     } else if (papan[row][col] === 1) {
-                        scene.add.text(10 + col * 80, 10 + row * 80, 'O', { fontSize: '64px', fill: '#000' });
+                        scene.add.text(30 + col * 80, 20 + row * 80, 'O', { fontSize: '64px', fill: '#000' });
                     }
                 }
             }
