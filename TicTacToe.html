@@ -1,75 +1,144 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">   
-        </script>
-    </head>
-    <body>
-        <pyxel-run script="
-import pyxel
+<head>
+    <meta charset="UTF-8">
+    <title>Tic Tac Toe dengan PhaserJS</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script>
+        const lebar = 240;
+        const tinggi = 240;
+        const hitam = 0x000000;
+        const papan = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]];
+        let pemain1 = 0;
+        let pemenang = null;
+        let gameOver = false;
 
-lebar = 240
-tinggi = 240
-hitam = 2
+        const config = {
+            type: Phaser.AUTO,
+            width: lebar,
+            height: tinggi,
+            backgroundColor: '#FFFFFF',
+            parent: 'game-container',
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
 
-papan = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]
-pemain1 = 0 
-pemenang = None
-game_over = False
+        const game = new Phaser.Game(config);
 
-def draw_papan():
-    pyxel.cls(15)
-    pyxel.rect(80, 0, 2, tinggi, hitam)
-    pyxel.rect(160, 0, 2, tinggi, hitam)
-    pyxel.rect(0, 80, lebar, 2, hitam)
-    pyxel.rect(0, 160, lebar, 2, hitam)
-    for row in range(3):
-        for col in range(3):
-            if papan[row][col] == 0:
-                pyxel.text(10 + col * 80, 10 + row * 80, 'X', hitam)
-            elif papan[row][col] == 1:
-                pyxel.text(10 + col * 80, 10 + row * 80, 'O', hitam)
+        function preload() {}
 
-def check_pemenang():
-    global pemenang
-    for i in range(3):
-        if papan[i][0] == papan[i][1] == papan[i][2] != -1:
-            pemenang = papan[i][0]
-            return True
-        if papan[0][i] == papan[1][i] == papan[2][i] != -1:
-            pemenang = papan[0][i]
-            return True
-    if papan[0][0] == papan[1][1] == papan[2][2] != -1:
-        pemenang = papan[0][0]
-        return True
-    if papan[0][2] == papan[1][1] == papan[2][0] != -1:
-        pemenang = papan[0][2]
-        return True
-    return False
+        function create() {
+            this.add.line(120, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            this.add.line(80, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            this.add.line(160, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            this.add.line(0, 80, lebar, 0, hitam).setOrigin(0, 0);
+            this.add.line(0, 160, lebar, 0, hitam).setOrigin(0, 0);
+            this.add.line(0, 240, lebar, 0, hitam).setOrigin(0, 0);
+            
+            this.input.on('pointerdown', handleClick, this);
 
-def update():
-    global pemain1, game_over
-    if game_over:
-        return
-    if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-        mouse_x = pyxel.mouse_x // 80
-        mouse_y = pyxel.mouse_y // 80
-        if papan[mouse_y][mouse_x] == -1:
-            papan[mouse_y][mouse_x] = pemain1
-            if check_pemenang():
-                game_over = True
-            pemain1 = 1 - pemain1
+            drawPapan(this);
+        }
 
-def draw():
-    draw_papan()
-    if game_over:
-        if pemenang is not None:
-            pyxel.text(90, 110, f'Player {pemenang + 1} Menang!', hitam)
-        else:
-            pyxel.text(100, 110, 'Permainan Seri!', hitam)
+        function update() {
+            if (gameOver) return;
+        }
 
-pyxel.init(lebar, tinggi)
-pyxel.mouse(True)
-pyxel.run(update, draw)
-"></pyxel-run>
-    </body>
+        function handleClick(pointer) {
+            if (gameOver) return;
+
+            const col = Math.floor(pointer.x / 80);
+            const row = Math.floor(pointer.y / 80);
+
+            if (papan[row][col] === -1) {
+                papan[row][col] = pemain1;
+                drawPapan(this);
+
+                if (checkPemenang()) {
+                    gameOver = true;
+                    this.add.text(90, 110, `Player ${pemenang + 1} Menang!`, { fontSize: '16px', fill: '#000' });
+                } else if (isFull()) {
+                    gameOver = true;
+                    this.add.text(100, 110, 'Permainan Seri!', { fontSize: '16px', fill: '#000' });
+                } else {
+                    pemain1 = 1 - pemain1;
+                }
+            }
+        }
+
+        function drawPapan(scene) {
+            scene.children.removeAll();
+
+            scene.add.line(120, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            scene.add.line(80, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            scene.add.line(160, 0, 0, 0, 0, tinggi, hitam).setOrigin(0, 0);
+            scene.add.line(0, 80, lebar, 0, hitam).setOrigin(0, 0);
+            scene.add.line(0, 160, lebar, 0, hitam).setOrigin(0, 0);
+
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    if (papan[row][col] === 0) {
+                        scene.add.text(10 + col * 80, 10 + row * 80, 'X', { fontSize: '64px', fill: '#000' });
+                    } else if (papan[row][col] === 1) {
+                        scene.add.text(10 + col * 80, 10 + row * 80, 'O', { fontSize: '64px', fill: '#000' });
+                    }
+                }
+            }
+        }
+
+        function checkPemenang() {
+            for (let i = 0; i < 3; i++) {
+                if (papan[i][0] === papan[i][1] && papan[i][1] === papan[i][2] && papan[i][0] !== -1) {
+                    pemenang = papan[i][0];
+                    return true;
+                }
+                if (papan[0][i] === papan[1][i] && papan[1][i] === papan[2][i] && papan[0][i] !== -1) {
+                    pemenang = papan[0][i];
+                    return true;
+                }
+            }
+            if (papan[0][0] === papan[1][1] && papan[1][1] === papan[2][2] && papan[0][0] !== -1) {
+                pemenang = papan[0][0];
+                return true;
+            }
+            if (papan[0][2] === papan[1][1] && papan[1][1] === papan[2][0] && papan[0][2] !== -1) {
+                pemenang = papan[0][2];
+                return true;
+            }
+            return false;
+        }
+
+        function isFull() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (papan[i][j] === -1) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    </script>
+</body>
 </html>
