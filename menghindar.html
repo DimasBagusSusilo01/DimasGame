@@ -1,99 +1,75 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <script src="https://cdn.jsdelivr.net/gh/kitao/pyxel/wasm/pyxel.js">       
-        </script>
-    </head>
-    <body>
-        <pyxel-run script="
-        import pyxel
-        import time
-        import random
-        
-        class waktu:
-            def __init__(self):
-                self.waktuawal = time.time()
-            def update(self):
-                self.waktuakhir = time.time()
-                self.waktusekarang = int(self.waktuakhir - self.waktuawal)
-            def draw(self):
-                pyxel.text(20,20,'{}'.format(self.waktusekarang),7)
-        
-        class musuh:
-            def __init__(self, x, y):
-                self.x = x
-                self.y = y
-                self.w = 10
-                self.h = 10
-                self.speed = 1
-                pyxel.images[0].load(0,0,'musuhpyxelbaru.png')
-        
-            def update(self):
-                self.y += 1
-        
-            def draw(self):
-                pyxel.blt(self.x,self.y,1,0,0,self.w,self.h,10)
-        
-        class pemain:
-            def __init__(self,x,y):
-                self.x = x
-                self.y = y
-                self.w = 10
-                self.h = 10
-                pyxel.images[1].load(0, 0, 'mainanpyxel.png')
-        
-            def update(self):
-                self.x = pyxel.mouse_x
-                self.y = pyxel.mouse_y
-                if self.x == 160:
-                    self.x = 0
-                elif self.x == 0:
-                    self.x = 160
-                elif self.y == 180:
-                    self.y = 0
-                elif self.y == 0:
-                    self.y = 180
-        
-            def draw(self):
-                pyxel.blt(self.x,self.y,0,0,0,self.w,self.h,10)
-        
-        class App:
-            def __init__(self):
-                pyxel.init(160,180, title='Bambang')
-                self.player = [pemain(80,150)for _ in range(1)]
-                self.skor = waktu()
-                self.enemies = [musuh(random.randint(0,160), random.randint(-180, 0))for _ in range(18)]
-                pyxel.run(self.update, self.draw)
-        
-            def tabrakan(self, x1,y1,w1,h1,x2,y2,w2,h2):
-                return (y1 > x2 + w2) or (x1 < w2 + h2) or (w1 > x2 + y2) or (h1 > x2 + w2)
-            
-            def update(self):
-                self.skor.update()
-                for pemain in self.player:
-                    pemain.update()
-                    for musuh in self.enemies:
-                        musuh.update()
-                        if musuh.y > 180:
-                            musuh.y = 0
-                            musuh.x = random.randint(0,160)
-                        if (
-                            pemain.x + pemain.w > musuh.x
-                            and musuh.x + musuh.w > pemain.x
-                            and pemain.y + pemain.h > musuh.y
-                            and musuh.y + musuh.h > pemain.y
-                        ):
-                            pyxel.quit()
-                if pyxel.btnp(pyxel.KEY_Q):
-                    pyxel.quit()
-        
-            def draw(self):
-                pyxel.cls(1)
-                for pemain in self.player:
-                    pemain.draw()
-                self.skor.draw()
-                for musuh in self.enemies:
-                    musuh.draw()
-        
-        App()"></pyxel-run>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>PhaserJS Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+</head>
+<body>
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: 160,
+        height: 180,
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    let game = new Phaser.Game(config);
+    let player;
+    let enemies;
+    let scoreText;
+    let startTime;
+
+    function preload() {
+        this.load.image('player', 'mainanpyxel.png');
+        this.load.image('enemy', 'musuhpyxelbaru.png');
+    }
+
+    function create() {
+        player = this.add.sprite(80, 150, 'player');
+        enemies = this.physics.add.group();
+        scoreText = this.add.text(20, 20, '0', { fontSize: '16px', fill: '#fff' });
+        startTime = this.time.now;
+
+        for (let i = 0; i < 18; i++) {
+            let x = Phaser.Math.Between(0, 160);
+            let y = Phaser.Math.Between(-180, 0);
+            let enemy = enemies.create(x, y, 'enemy');
+            enemy.setVelocity(0, 100);
+        }
+
+        this.input.on('pointermove', function (pointer) {
+            player.x = pointer.x;
+            player.y = pointer.y;
+        }, this);
+
+        this.physics.add.overlap(player, enemies, gameOver, null, this);
+    }
+
+    function update() {
+        enemies.children.iterate(function (enemy) {
+            if (enemy.y > 180) {
+                enemy.y = 0;
+                enemy.x = Phaser.Math.Between(0, 160);
+            }
+        });
+
+        let currentTime = this.time.now;
+        let elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+        scoreText.setText(elapsedSeconds.toString());
+
+        if (this.input.keyboard.checkDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q), 250)) {
+            this.scene.pause();
+        }
+    }
+
+    function gameOver(player, enemy) {
+        this.scene.pause();
+    }
+</script>
+</body>
 </html>
